@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres-item:5432/item_db  # Only changed value
+    # username/password remain inherited from application.yml
+
+  kafka:
+    consumer:
+      bootstrap-servers: kafka:9092
+      group-id: item-service-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka  # Only changed value
+
+management:
+  zipkin:
+    tracing:
+      endpoint: http://zipkin:9411/api/v2/spans  # Only changed value
