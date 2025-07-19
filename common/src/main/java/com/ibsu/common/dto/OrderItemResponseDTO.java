@@ -1,14 +1,16 @@
-package com.ibsu.order_service.dto;
+package com.ibsu.common.dto;
 
 public class OrderItemResponseDTO {
     private Long itemId;
     private String itemName;
+    private String artistName;
     private String itemImage;
     private Double priceSnapshot;
 
-    public OrderItemResponseDTO(Long itemId, String itemName, String itemImage, Double priceSnapshot) {
+    public OrderItemResponseDTO(Long itemId, String itemName, String artistName, String itemImage, Double priceSnapshot) {
         this.itemId = itemId;
         this.itemName = itemName;
+        this.artistName = artistName;
         this.itemImage = itemImage;
         this.priceSnapshot = priceSnapshot;
     }
@@ -48,4 +50,11 @@ public class OrderItemResponseDTO {
         this.priceSnapshot = priceSnapshot;
     }
 
+    public String getArtistName() {
+        return artistName;
+    }
+
+    public void setArtistName(String artistName) {
+        this.artistName = artistName;
+    }
 }

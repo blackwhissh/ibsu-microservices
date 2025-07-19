@@ -1,5 +1,8 @@
 package com.ibsu.order_service.dto;
 
+import com.ibsu.common.dto.OrderItemResponseDTO;
+import com.ibsu.common.enums.OrderStatusEnum;
+
 import java.time.Instant;
 import java.util.List;
 
@@ -9,12 +12,14 @@ public class OrderResponseDTO {
     private Double totalPrice;
     private Instant createdAt;
     private List<OrderItemResponseDTO> items;
-    public OrderResponseDTO(Long orderId, Long userId, Double totalPrice, Instant createdAt, List<OrderItemResponseDTO> items) {
+    private OrderStatusEnum orderStatus;
+    public OrderResponseDTO(Long orderId, Long userId, Double totalPrice, Instant createdAt, List<OrderItemResponseDTO> items, OrderStatusEnum orderStatus) {
         this.orderId = orderId;
         this.userId = userId;
         this.totalPrice = totalPrice;
         this.createdAt = createdAt;
         this.items = items;
+        this.orderStatus = orderStatus;
     }
     public OrderResponseDTO() {
     }
@@ -53,6 +58,14 @@ public class OrderResponseDTO {
 
     public List<OrderItemResponseDTO> getItems() {
         return items;
+    }
+
+    public OrderStatusEnum getOrderStatus() {
+        return orderStatus;
+    }
+
+    public void setOrderStatus(OrderStatusEnum orderStatus) {
+        this.orderStatus = orderStatus;
     }
 
     public void setItems(List<OrderItemResponseDTO> items) {

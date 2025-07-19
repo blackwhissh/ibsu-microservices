@@ -26,7 +26,7 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/actuator/health", "/actuator/prometheus").permitAll()
+                        .requestMatchers("/actuator/health", "/actuator/prometheus", "/cart/exists").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityHeaderFilter, UsernamePasswordAuthenticationFilter.class)

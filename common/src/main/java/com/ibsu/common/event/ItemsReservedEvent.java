@@ -2,13 +2,13 @@ package com.ibsu.common.event;
 
 import java.util.List;
 
-public class ItemsRemovedEvent {
+public class ItemsReservedEvent {
     private List<Long> itemIds;
 
-    public ItemsRemovedEvent(List<Long> itemIds) {
+    public ItemsReservedEvent(List<Long> itemIds) {
         this.itemIds = itemIds;
     }
-    public ItemsRemovedEvent() {
+    public ItemsReservedEvent() {
     }
 
     public List<Long> getItemIds() {

@@ -27,7 +27,7 @@ public class SecurityHeaderFilter extends OncePerRequestFilter {
 
         String userId = request.getHeader(USER_ID_HEADER);
         String role = request.getHeader(ROLE_HEADER);
-
+        role = "ROLE_" + role;
         if (userId != null && role != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
 

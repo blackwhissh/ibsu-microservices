@@ -1,12 +1,10 @@
 # ---- Stage 1: Build ----
-FROM eclipse-temurin:17-jdk AS builder
+FROM maven:3.9.6-eclipse-temurin-17 AS builder
 
 WORKDIR /app
 
 # Copy entire multi-module project
 COPY . .
-
-RUN apt-get update && apt-get install -y maven
 
 RUN mvn -pl api-gateway -am clean package -DskipTests
 

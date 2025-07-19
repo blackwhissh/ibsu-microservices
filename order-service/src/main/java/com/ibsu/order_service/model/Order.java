@@ -1,5 +1,6 @@
 package com.ibsu.order_service.model;
 
+import com.ibsu.common.enums.OrderStatusEnum;
 import jakarta.persistence.Entity;
 
 import jakarta.persistence.*;
@@ -23,6 +24,9 @@ public class Order {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items;
+
+    @Enumerated(EnumType.STRING)
+    private OrderStatusEnum orderStatus;
 
     public Order(Long userId, Double totalPrice, Instant createdAt, List<OrderItem> items) {
         this.userId = userId;
@@ -72,6 +76,14 @@ public class Order {
 
     public void setItems(List<OrderItem> items) {
         this.items = items;
+    }
+
+    public OrderStatusEnum getOrderStatus() {
+        return orderStatus;
+    }
+
+    public void setOrderStatus(OrderStatusEnum orderStatus) {
+        this.orderStatus = orderStatus;
     }
 }
 

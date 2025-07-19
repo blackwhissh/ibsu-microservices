@@ -1,31 +1,42 @@
 package com.ibsu.item_service.controller;
 
-import com.ibsu.item_service.ItemService;
-import com.ibsu.item_service.dto.ItemPreviewDTO;
+import com.ibsu.item_service.dto.AddItemDTO;
+import com.ibsu.item_service.dto.UpdateItemDTO;
+import com.ibsu.item_service.service.ItemService;
+import com.ibsu.common.dto.ItemPreviewDTO;
 import com.ibsu.item_service.model.Item;
 import com.ibsu.item_service.repository.ItemRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 @RequestMapping("/item")
 public class ItemController {
     private final ItemService itemService;
-    private final ItemRepository itemRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
-    public ItemController(ItemService itemService, ItemRepository itemRepository, SimpMessagingTemplate messagingTemplate) {
+    public ItemController(ItemService itemService, SimpMessagingTemplate messagingTemplate) {
         this.itemService = itemService;
-        this.itemRepository = itemRepository;
         this.messagingTemplate = messagingTemplate;
     }
 
     @PostMapping("/add")
-    public ItemPreviewDTO addItem(@RequestBody Item item) {
-        Item saved = itemService.addItem(item);
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ItemPreviewDTO addItem(@RequestBody AddItemDTO addItemDTO) {
+        Item saved = itemService.addItem(
+                addItemDTO.title(), addItemDTO.description(), addItemDTO.size(),
+                addItemDTO.medium(), addItemDTO.price(), addItemDTO.imageUrl(),
+                addItemDTO.paintedDate(), addItemDTO.artist()
+        );
 
         ItemPreviewDTO dto = mapToDto(saved);
         messagingTemplate.convertAndSend("/topic/items", dto);
@@ -33,19 +44,41 @@ public class ItemController {
     }
 
     @GetMapping("/get/{itemId}")
-    public Item getItem(@PathVariable Long itemId) {
-        return itemRepository.findById(itemId).orElseThrow();
+    public ResponseEntity<Item> getItem(@PathVariable Long itemId) {
+        return ResponseEntity.ok(itemService.getItemById(itemId));
     }
 
     @GetMapping("/get-all")
-    public List<Item> getAllItems() {
-        return itemRepository.findAll();
+    public ResponseEntity<Page<Item>> getAllAvailableItems(
+            @PageableDefault(page = 0, size = 9, sort = "publishDate", direction = Sort.Direction.DESC)
+            Pageable pageable) {
+        return ResponseEntity.ok(itemService.getAllAvailableItems(pageable));
     }
 
     @DeleteMapping("/delete-items")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> deleteItem(@RequestBody List<Long> itemId) {
         itemService.deleteItems(itemId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/update")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<Item> updateItem(@RequestBody UpdateItemDTO updateItemDTO) {
+        return ResponseEntity.ok(itemService.updateItemById(
+                updateItemDTO.id(), updateItemDTO.title(), updateItemDTO.description(), updateItemDTO.price(),
+                updateItemDTO.artist(), updateItemDTO.size(), updateItemDTO.medium(), updateItemDTO.imageUrl(),
+                updateItemDTO.paintedDate()
+        ));
+    }
+
+    @GetMapping("/get-by-ids")
+    public ResponseEntity<List<ItemPreviewDTO>> getItemsByIds(@RequestBody List<Long> itemIds) {
+        List<ItemPreviewDTO> itemPreviewDTOS = new ArrayList<>();
+        for (Long itemId : itemIds) {
+            itemPreviewDTOS.add(mapToDto(itemService.getItemById(itemId)));
+        }
+        return ResponseEntity.ok(itemPreviewDTOS);
     }
 
     private ItemPreviewDTO mapToDto(Item item) {

@@ -1,13 +1,10 @@
 # ---- Stage 1: Build ----
-FROM eclipse-temurin:17-jdk AS builder
+FROM maven:3.9.6-eclipse-temurin-17 AS builder
 
 WORKDIR /app
 
 # Copy entire multi-module project
 COPY . .
-
-# Install Maven (Debian-based, suitable for Temurin)
-RUN apt-get update && apt-get install -y maven
 
 # Build only auth-service and its dependencies (e.g., common)
 RUN mvn -pl auth-service -am clean package -DskipTests

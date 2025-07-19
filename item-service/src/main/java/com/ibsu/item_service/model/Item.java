@@ -1,8 +1,10 @@
 package com.ibsu.item_service.model;
 
+import com.ibsu.common.enums.ItemStatusEnum;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "item")
@@ -18,11 +20,13 @@ public class Item {
     private String size;
     private String medium;
     private String imageUrl;
-    private LocalDate publishDate;
+    private LocalDateTime publishDate;
     private LocalDate paintedDate;
+    @Enumerated(EnumType.STRING)
+    private ItemStatusEnum itemStatus;
 
-    public Item(String title, String description, Double price, String artist, String size,
-                String medium, String imageUrl, LocalDate paintedDate) {
+    public Item(String title, String description, String size, String medium, Double price,
+                String imageUrl, LocalDate paintedDate, String artist) {
         this.title = title;
         this.description = description;
         this.price = price;
@@ -30,8 +34,9 @@ public class Item {
         this.size = size;
         this.medium = medium;
         this.imageUrl = imageUrl;
-        this.publishDate = LocalDate.now();
+        this.publishDate = LocalDateTime.now();
         this.paintedDate = paintedDate;
+        this.itemStatus = ItemStatusEnum.AVAILABLE;
     }
 
     public Item() {
@@ -77,11 +82,11 @@ public class Item {
         this.imageUrl = imageUrl;
     }
 
-    public LocalDate getPublishDate() {
+    public LocalDateTime getPublishDate() {
         return publishDate;
     }
 
-    public void setPublishDate(LocalDate publishDate) {
+    public void setPublishDate(LocalDateTime publishDate) {
         this.publishDate = publishDate;
     }
 
@@ -115,5 +120,13 @@ public class Item {
 
     public void setPaintedDate(LocalDate paintedDate) {
         this.paintedDate = paintedDate;
+    }
+
+    public ItemStatusEnum getItemStatus() {
+        return itemStatus;
+    }
+
+    public void setItemStatus(ItemStatusEnum itemStatus) {
+        this.itemStatus = itemStatus;
     }
 }

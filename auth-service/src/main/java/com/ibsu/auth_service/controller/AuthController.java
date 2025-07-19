@@ -17,6 +17,7 @@ import com.ibsu.common.dto.EditUserRequest;
 import com.ibsu.common.exceptions.RefreshTokenNotFoundException;
 import com.ibsu.common.exceptions.UserNotFoundException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,6 +42,7 @@ public class AuthController {
     }
 
     @PostMapping("/deactivate")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> deactivateUser() {
         Long userId = Long.parseLong(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
         authService.deactivateUser(userId);

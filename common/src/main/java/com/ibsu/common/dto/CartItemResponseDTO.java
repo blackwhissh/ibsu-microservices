@@ -6,13 +6,15 @@ public class CartItemResponseDTO {
     private String itemImage;
     private double priceSnapshot;
     private double total;
+    private String artistName;
 
-    public CartItemResponseDTO(Long itemId, String itemName, String itemImage, double priceSnapshot, double total) {
+    public CartItemResponseDTO(Long itemId, String itemName, String itemImage, double priceSnapshot, double total, String artistName) {
         this.itemId = itemId;
         this.itemName = itemName;
         this.itemImage = itemImage;
         this.priceSnapshot = priceSnapshot;
         this.total = total;
+        this.artistName = artistName;
     }
 
     public CartItemResponseDTO() {
@@ -56,5 +58,13 @@ public class CartItemResponseDTO {
 
     public void setTotal(double total) {
         this.total = total;
+    }
+
+    public String getArtistName() {
+        return artistName;
+    }
+
+    public void setArtistName(String artistName) {
+        this.artistName = artistName;
     }
 }

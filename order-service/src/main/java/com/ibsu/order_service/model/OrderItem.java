@@ -19,15 +19,17 @@ public class OrderItem {
 
     private Double priceSnapshot;
 
+    private String artistName;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id")
     private Order order;
 
-    public OrderItem(Long itemId, String itemName, String itemImage, Double priceSnapshot) {
+    public OrderItem(Long itemId, String itemName, String itemImage, Double priceSnapshot, String artistName) {
         this.itemId = itemId;
         this.itemName = itemName;
         this.itemImage = itemImage;
         this.priceSnapshot = priceSnapshot;
+        this.artistName = artistName;
     }
 
     public OrderItem() {
@@ -79,6 +81,14 @@ public class OrderItem {
 
     public void setOrder(Order order) {
         this.order = order;
+    }
+
+    public String getArtistName() {
+        return artistName;
+    }
+
+    public void setArtistName(String artistName) {
+        this.artistName = artistName;
     }
 }
 

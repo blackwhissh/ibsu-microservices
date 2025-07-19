@@ -11,11 +11,13 @@ public class CartItem {
     private Long itemId;
     private Long userId;
     private Double priceSnapshot;
+    private String artistName;
 
-    public CartItem(Long itemId, Long userId, Double priceSnapshot) {
+    public CartItem(Long itemId, Long userId, Double priceSnapshot, String artistName) {
         this.itemId = itemId;
         this.userId = userId;
         this.priceSnapshot = priceSnapshot;
+        this.artistName = artistName;
     }
     public CartItem() {
     }
@@ -50,5 +52,13 @@ public class CartItem {
 
     public void setPriceSnapshot(Double priceSnapshot) {
         this.priceSnapshot = priceSnapshot;
+    }
+
+    public String getArtistName() {
+        return artistName;
+    }
+
+    public void setArtistName(String artistName) {
+        this.artistName = artistName;
     }
 }

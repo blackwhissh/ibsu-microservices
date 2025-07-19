@@ -1,4 +1,4 @@
-package com.ibsu.item_service.dto;
+package com.ibsu.common.dto;
 
 public class ItemPreviewDTO {
     private Long itemId;

@@ -28,17 +28,20 @@ public class JwtAuthFilter implements GatewayFilterFactory<JwtAuthFilter.Config>
 
             System.out.println("Gateway received request for path: " + request.getURI().getPath());
             System.out.println("Auth header: " + request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION));
-
+            String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
             if (request.getURI().getPath().startsWith("/auth") &&
                     !request.getURI().getPath().equals("/auth/user") &&
                     !request.getURI().getPath().equals("/auth/edit")) {
-                return chain.filter(exchange); // Skip all /auth/** EXCEPT /auth/user
+                return chain.filter(exchange);
             }
 
             if (exchange.getRequest().getPath().toString().equals("/item/get-all")) {
                 return chain.filter(exchange); // Skip JWT check
             }
-            if (request.getURI().getPath().startsWith("/item/get/")) {
+            if (request.getURI().getPath().startsWith("/item/get")) {
+                return chain.filter(exchange); // Skip JWT check
+            }
+            if (request.getURI().getPath().startsWith("/cart/exists") && (authHeader == null || !authHeader.startsWith("Bearer "))) {
                 return chain.filter(exchange); // Skip JWT check
             }
 
@@ -50,7 +53,7 @@ public class JwtAuthFilter implements GatewayFilterFactory<JwtAuthFilter.Config>
                 return chain.filter(exchange); // Skip JWT check
             }
 
-            String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+
 
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 return unauthorized(exchange);

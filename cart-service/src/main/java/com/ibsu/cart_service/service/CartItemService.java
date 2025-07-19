@@ -38,11 +38,11 @@ public class CartItemService {
         return new CartResponseDTO(itemDTOs, total);
     }
 
-    public CartItem addToCart(Long userId, Long itemId, double priceSnapshot) {
+    public CartItem addToCart(Long userId, Long itemId, double priceSnapshot, String artistName) {
         if (cartItemRepository.existsByUserIdAndItemId(userId, itemId)) {
             throw new IllegalArgumentException("Item already in cart");
         }
-        CartItem newItem = new CartItem(itemId, userId, priceSnapshot);
+        CartItem newItem = new CartItem(itemId, userId, priceSnapshot, artistName);
         return cartItemRepository.save(newItem);
     }
 
@@ -68,7 +68,8 @@ public class CartItemService {
                 itemDTO.getTitle(),
                 itemDTO.getImageUrl(),
                 item.getPriceSnapshot(),
-                item.getPriceSnapshot()
+                item.getPriceSnapshot(),
+                item.getArtistName()
         );
     }
 

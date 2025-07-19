@@ -18,6 +18,7 @@
         <module>profile-service</module>
         <module>item-service</module>
         <module>cart-service</module>
+<!--        <module>auction-service</module>-->
     </modules>
 
     <properties>

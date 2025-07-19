@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres-auction:5432/auction_db  # Only changed value
+    # username/password remain inherited from application.yml
+  data:
+    redis:
+      host: redis
+      port: 6379
+  kafka:
+    consumer:
+      bootstrap-servers: kafka:9092
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka  # Only changed value
+
+management:
+  zipkin:
+    tracing:
+      endpoint: http://zipkin:9411/api/v2/spans  # Only changed value

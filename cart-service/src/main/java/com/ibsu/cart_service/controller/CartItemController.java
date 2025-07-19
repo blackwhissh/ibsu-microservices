@@ -31,8 +31,8 @@ public class CartItemController {
         Long userId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
         Long itemId = Long.valueOf(payload.get("itemId").toString());
         double priceSnapshot = Double.parseDouble(payload.get("priceSnapshot").toString());
-
-        return cartItemService.addToCart(userId, itemId, priceSnapshot);
+        String artistName = payload.get("artistName").toString();
+        return cartItemService.addToCart(userId, itemId, priceSnapshot, artistName);
     }
 
     @DeleteMapping("/remove")
@@ -50,8 +50,11 @@ public class CartItemController {
 
     @GetMapping("/exists")
     public boolean isItemInCart(@RequestParam Long itemId) {
-        Long userId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
-        System.out.println(userId);
+        String userIdString = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        if (userIdString.equals("anonymousUser")) {
+            return false;
+        }
+        Long userId = Long.valueOf(userIdString);
         return cartItemService.existsByUserIdAndItemId(userId, itemId);
     }
 }
