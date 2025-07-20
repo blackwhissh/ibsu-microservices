@@ -73,4 +73,8 @@ public class ItemService {
         LOGGER.info("Getting items by ids: {}", itemIds);
         return itemRepository.findAllById(itemIds);
     }
+
+    public ItemStatusEnum getItemStatus(Long itemId) {
+        return itemRepository.getItemStatus(itemId);
+    }
 }

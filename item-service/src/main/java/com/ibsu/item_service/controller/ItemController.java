@@ -1,5 +1,6 @@
 package com.ibsu.item_service.controller;
 
+import com.ibsu.common.enums.ItemStatusEnum;
 import com.ibsu.item_service.dto.AddItemDTO;
 import com.ibsu.item_service.dto.UpdateItemDTO;
 import com.ibsu.item_service.service.ItemService;
@@ -79,6 +80,11 @@ public class ItemController {
             itemPreviewDTOS.add(mapToDto(itemService.getItemById(itemId)));
         }
         return ResponseEntity.ok(itemPreviewDTOS);
+    }
+
+    @GetMapping("/item/get/{itemId}/status")
+    public ItemStatusEnum getItemStatus(@PathVariable("itemId") Long itemId) {
+        return itemService.getItemStatus(itemId);
     }
 
     private ItemPreviewDTO mapToDto(Item item) {

@@ -1,6 +1,7 @@
 package com.ibsu.order_service.dto;
 
 import com.ibsu.common.dto.OrderItemResponseDTO;
+import com.ibsu.common.enums.DeliveryTypeEnum;
 import com.ibsu.common.enums.OrderStatusEnum;
 
 import java.time.Instant;
@@ -13,13 +14,15 @@ public class OrderResponseDTO {
     private Instant createdAt;
     private List<OrderItemResponseDTO> items;
     private OrderStatusEnum orderStatus;
-    public OrderResponseDTO(Long orderId, Long userId, Double totalPrice, Instant createdAt, List<OrderItemResponseDTO> items, OrderStatusEnum orderStatus) {
+    private DeliveryTypeEnum deliveryType;
+    public OrderResponseDTO(Long orderId, Long userId, Double totalPrice, Instant createdAt, List<OrderItemResponseDTO> items, OrderStatusEnum orderStatus, DeliveryTypeEnum deliveryType) {
         this.orderId = orderId;
         this.userId = userId;
         this.totalPrice = totalPrice;
         this.createdAt = createdAt;
         this.items = items;
         this.orderStatus = orderStatus;
+        this.deliveryType = deliveryType;
     }
     public OrderResponseDTO() {
     }
@@ -70,5 +73,13 @@ public class OrderResponseDTO {
 
     public void setItems(List<OrderItemResponseDTO> items) {
         this.items = items;
+    }
+
+    public DeliveryTypeEnum getDeliveryType() {
+        return deliveryType;
+    }
+
+    public void setDeliveryType(DeliveryTypeEnum deliveryType) {
+        this.deliveryType = deliveryType;
     }
 }

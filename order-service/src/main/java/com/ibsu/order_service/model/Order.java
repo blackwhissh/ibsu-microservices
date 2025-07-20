@@ -1,5 +1,6 @@
 package com.ibsu.order_service.model;
 
+import com.ibsu.common.enums.DeliveryTypeEnum;
 import com.ibsu.common.enums.OrderStatusEnum;
 import jakarta.persistence.Entity;
 
@@ -27,6 +28,9 @@ public class Order {
 
     @Enumerated(EnumType.STRING)
     private OrderStatusEnum orderStatus;
+
+    @Enumerated(EnumType.STRING)
+    private DeliveryTypeEnum deliveryType;
 
     public Order(Long userId, Double totalPrice, Instant createdAt, List<OrderItem> items) {
         this.userId = userId;
@@ -84,6 +88,14 @@ public class Order {
 
     public void setOrderStatus(OrderStatusEnum orderStatus) {
         this.orderStatus = orderStatus;
+    }
+
+    public DeliveryTypeEnum getDeliveryType() {
+        return deliveryType;
+    }
+
+    public void setDeliveryType(DeliveryTypeEnum deliveryType) {
+        this.deliveryType = deliveryType;
     }
 }
 

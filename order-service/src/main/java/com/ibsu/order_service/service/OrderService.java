@@ -3,6 +3,7 @@ package com.ibsu.order_service.service;
 import com.ibsu.common.dto.CartItemResponseDTO;
 import com.ibsu.common.dto.CartResponseDTO;
 import com.ibsu.common.dto.OrderItemResponseDTO;
+import com.ibsu.common.enums.DeliveryTypeEnum;
 import com.ibsu.common.enums.OrderStatusEnum;
 import com.ibsu.common.event.ItemsReservedEvent;
 import com.ibsu.common.event.OrderCanceledEvent;
@@ -61,7 +62,7 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderResponseDTO checkout(Long userId) {
+    public OrderResponseDTO checkout(Long userId, DeliveryTypeEnum deliveryType) {
         CartResponseDTO cart = cartClient.getCart();
 
         if (cart.getItems() == null || cart.getItems().isEmpty()) {
@@ -78,14 +79,18 @@ public class OrderService {
             orderItem.setArtistName(cartItem.getArtistName());
             orderItems.add(orderItem);
         }
-
+        double totalPrice = cart.getTotalPrice();
+        switch (deliveryType) {
+            case OUT -> totalPrice += 10;
+            case TBILISI -> totalPrice += 5;
+        }
         Order order = new Order();
         order.setUserId(userId);
-        order.setTotalPrice(cart.getTotalPrice());
+        order.setTotalPrice(totalPrice);
         order.setCreatedAt(Instant.now());
         order.setItems(orderItems);
         order.setOrderStatus(OrderStatusEnum.PENDING);
-
+        order.setDeliveryType(deliveryType);
         for (OrderItem item : orderItems) {
             item.setOrder(order);
         }
@@ -113,6 +118,7 @@ public class OrderService {
         response.setTotalPrice(savedOrder.getTotalPrice());
         response.setCreatedAt(savedOrder.getCreatedAt());
         response.setItems(itemDTOs);
+        response.setDeliveryType(deliveryType);
 
         orderCheckoutKafkaTemplate.send(CHECKOUT_NOTIFICATION_TOPIC, response);
 
@@ -134,7 +140,8 @@ public class OrderService {
                     order.getTotalPrice(),
                     order.getCreatedAt(),
                     firstItem != null ? firstItem.getItemImage() : null,
-                    order.getOrderStatus()
+                    order.getOrderStatus(),
+                    order.getDeliveryType()
             );
         });
     }
@@ -147,7 +154,7 @@ public class OrderService {
         }
         return new OrderResponseDTO(
                 order.getId(), userId, order.getTotalPrice(),
-                order.getCreatedAt(), orderItems, order.getOrderStatus()
+                order.getCreatedAt(), orderItems, order.getOrderStatus(), order.getDeliveryType()
         );
     }
 

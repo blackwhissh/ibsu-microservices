@@ -1,5 +1,6 @@
 package com.ibsu.order_service.controller;
 
+import com.ibsu.common.enums.DeliveryTypeEnum;
 import com.ibsu.order_service.dto.OrderHistoryDTO;
 import com.ibsu.order_service.dto.OrderResponseDTO;
 import com.ibsu.order_service.model.Order;
@@ -26,9 +27,12 @@ public class OrderController {
     }
 
     @PostMapping(value = "/checkout")
-    public ResponseEntity<OrderResponseDTO> checkout() {
+    public ResponseEntity<OrderResponseDTO> checkout(@RequestParam DeliveryTypeEnum delivery) {
         Long userId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
-        return ResponseEntity.ok(orderService.checkout(userId));
+        if (delivery == null) {
+            delivery = DeliveryTypeEnum.ONSITE;
+        }
+        return ResponseEntity.ok(orderService.checkout(userId, delivery));
     }
 
     @GetMapping("/history")

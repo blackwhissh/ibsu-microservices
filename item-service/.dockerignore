@@ -12,7 +12,7 @@
 Thumbs.db
 
 # Ignore local environment/config
-.env
+../.env
 *.log
 
 # Ignore build artifacts

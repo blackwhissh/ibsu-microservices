@@ -6,6 +6,7 @@ import com.ibsu.common.dto.CartResponseDTO;
 import com.ibsu.cart_service.dto.ItemDTO;
 import com.ibsu.cart_service.model.CartItem;
 import com.ibsu.cart_service.repository.CartItemRepository;
+import com.ibsu.common.enums.ItemStatusEnum;
 import jakarta.transaction.Transactional;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -18,10 +19,12 @@ public class CartItemService {
     private final CachedItemService cachedItemService;
 
     private final CartItemRepository cartItemRepository;
+    private final ItemClient itemClient;
 
-    public CartItemService(CachedItemService cachedItemService, CartItemRepository cartItemRepository) {
+    public CartItemService(CachedItemService cachedItemService, CartItemRepository cartItemRepository, ItemClient itemClient) {
         this.cachedItemService = cachedItemService;
         this.cartItemRepository = cartItemRepository;
+        this.itemClient = itemClient;
     }
 
     public CartResponseDTO getCartByUserId(Long userId) {
@@ -41,6 +44,9 @@ public class CartItemService {
     public CartItem addToCart(Long userId, Long itemId, double priceSnapshot, String artistName) {
         if (cartItemRepository.existsByUserIdAndItemId(userId, itemId)) {
             throw new IllegalArgumentException("Item already in cart");
+        }
+        if (!itemClient.getItemStatus(itemId).equals(ItemStatusEnum.AVAILABLE)) {
+            throw new IllegalArgumentException("Item is not available");
         }
         CartItem newItem = new CartItem(itemId, userId, priceSnapshot, artistName);
         return cartItemRepository.save(newItem);
