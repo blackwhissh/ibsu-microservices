@@ -20,10 +20,19 @@ public class Item {
     private String size;
     private String medium;
     private String imageUrl;
+    private String cloudinaryPublicId;
     private LocalDateTime publishDate;
     private LocalDate paintedDate;
     @Enumerated(EnumType.STRING)
     private ItemStatusEnum itemStatus;
+
+    public String getCloudinaryPublicId() {
+        return cloudinaryPublicId;
+    }
+
+    public void setCloudinaryPublicId(String cloudinaryPublicId) {
+        this.cloudinaryPublicId = cloudinaryPublicId;
+    }
 
     public Item(String title, String description, String size, String medium, Double price,
                 String imageUrl, LocalDate paintedDate, String artist) {

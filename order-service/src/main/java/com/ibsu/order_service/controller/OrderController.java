@@ -43,6 +43,14 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getUserOrderHistory(userId, pageable));
     }
 
+    @GetMapping("/admin/history/{userId}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<Page<OrderHistoryDTO>> getUserOrdersByAdmin(
+            @PageableDefault(page = 0, size = 9, sort = "createdAt", direction = Sort.Direction.DESC)
+            Pageable pageable, @PathVariable Long userId) {
+        return ResponseEntity.ok(orderService.getUserOrderHistory(userId, pageable));
+    }
+
     @GetMapping("/{orderId}")
     public ResponseEntity<OrderResponseDTO> getOrderByCurrentUser(@PathVariable Long orderId) {
         Long userId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
@@ -56,6 +64,13 @@ public class OrderController {
         return ResponseEntity.ok().build();
     }
 
+    @DeleteMapping("/admin/cancel/{orderId}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<OrderResponseDTO> cancelOrderByAdmin(@PathVariable Long orderId, @RequestParam Long userId) {
+        orderService.deleteOrderByCurrentUser(userId, orderId);
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/confirm/{orderId}")
     public ResponseEntity<?> confirmOrderByCurrentUser(@PathVariable Long orderId) {
         Long userId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
@@ -63,7 +78,7 @@ public class OrderController {
         return ResponseEntity.ok().body("Order confirmed");
     }
 
-    @PostMapping("/approve")
+    @PostMapping("/admin/approve")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<OrderResponseDTO> approveOrderByCurrentUser(@RequestParam Long userId, @RequestParam Long orderId) {
         orderService.approveOrder(userId, orderId);

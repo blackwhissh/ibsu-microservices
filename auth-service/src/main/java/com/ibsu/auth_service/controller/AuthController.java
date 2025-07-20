@@ -41,7 +41,7 @@ public class AuthController {
         return ResponseEntity.ok(authService.register(request.username(), request.password(), request.email(), request.phone(), request.firstName(), request.lastName()));
     }
 
-    @PostMapping("/deactivate")
+    @PostMapping("/admin/deactivate")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> deactivateUser() {
         Long userId = Long.parseLong(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());

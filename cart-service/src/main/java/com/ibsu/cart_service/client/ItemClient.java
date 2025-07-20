@@ -16,6 +16,7 @@ public interface ItemClient {
     @GetMapping("/item/get/{itemId}")
     ItemDTO getItemById(@PathVariable("itemId") Long itemId);
 
-    @GetMapping("/item/get/{itemId}/status")
+    @GetMapping("/item/internal/item/{itemId}/status")
     ItemStatusEnum getItemStatus(@PathVariable("itemId") Long itemId);
+
 }

@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -30,13 +31,13 @@ public class ItemController {
         this.messagingTemplate = messagingTemplate;
     }
 
-    @PostMapping("/add")
+    @PostMapping(value = "/admin/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ItemPreviewDTO addItem(@RequestBody AddItemDTO addItemDTO) {
+    public ItemPreviewDTO addItem(@ModelAttribute AddItemDTO addItemDTO) {
         Item saved = itemService.addItem(
-                addItemDTO.title(), addItemDTO.description(), addItemDTO.size(),
-                addItemDTO.medium(), addItemDTO.price(), addItemDTO.imageUrl(),
-                addItemDTO.paintedDate(), addItemDTO.artist()
+                addItemDTO.getTitle(), addItemDTO.getDescription(), addItemDTO.getSize(),
+                addItemDTO.getMedium(), addItemDTO.getPrice(), addItemDTO.getImageFile(),
+                addItemDTO.getPaintedDate(), addItemDTO.getArtist()
         );
 
         ItemPreviewDTO dto = mapToDto(saved);
@@ -56,19 +57,26 @@ public class ItemController {
         return ResponseEntity.ok(itemService.getAllAvailableItems(pageable));
     }
 
-    @DeleteMapping("/delete-items")
+    @DeleteMapping("/admin/delete-items")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> deleteItem(@RequestBody List<Long> itemId) {
         itemService.deleteItems(itemId);
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/update")
+    @DeleteMapping("/admin/delete")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> deleteItem(@RequestParam Long itemId) {
+        itemService.deleteItem(itemId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/admin/update")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Item> updateItem(@RequestBody UpdateItemDTO updateItemDTO) {
         return ResponseEntity.ok(itemService.updateItemById(
                 updateItemDTO.id(), updateItemDTO.title(), updateItemDTO.description(), updateItemDTO.price(),
-                updateItemDTO.artist(), updateItemDTO.size(), updateItemDTO.medium(), updateItemDTO.imageUrl(),
+                updateItemDTO.artist(), updateItemDTO.size(), updateItemDTO.medium(), updateItemDTO.imageFile(),
                 updateItemDTO.paintedDate()
         ));
     }
@@ -82,8 +90,8 @@ public class ItemController {
         return ResponseEntity.ok(itemPreviewDTOS);
     }
 
-    @GetMapping("/item/get/{itemId}/status")
-    public ItemStatusEnum getItemStatus(@PathVariable("itemId") Long itemId) {
+    @GetMapping("/internal/item/{itemId}/status")
+    public ItemStatusEnum getItemStatusInternal(@PathVariable Long itemId) {
         return itemService.getItemStatus(itemId);
     }
 

@@ -33,6 +33,7 @@ public class SecurityConfig {
                         .requestMatchers("/ws-items/**", "/topic/**").permitAll() // Public WebSocket
                         .requestMatchers("/item/get-all", "/item/get/**").permitAll() // Public GET
                         .requestMatchers("/actuator/health", "/actuator/prometheus").permitAll()
+                        .requestMatchers("/item/internal/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityHeaderFilter, UsernamePasswordAuthenticationFilter.class)
