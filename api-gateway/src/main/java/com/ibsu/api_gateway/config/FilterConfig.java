@@ -17,6 +17,9 @@ public class FilterConfig {
                 .route("auth-user-edit-filtered", r -> r.path("/auth/edit")
                         .filters(f -> f.filter(jwtAuthFilter.apply(new JwtAuthFilter.Config())))
                         .uri("lb://auth-service"))
+                .route("auth-user-admin-filtered", r -> r.path("/auth/admin/**")
+                        .filters(f -> f.filter(jwtAuthFilter.apply(new JwtAuthFilter.Config())))
+                        .uri("lb://auth-service"))
                 .route("auth-service-open", r -> r.path("/auth/**")
                         .and().not(ra -> ra.path("/auth/user")) // Exclude /auth/user
                         .uri("lb://auth-service"))

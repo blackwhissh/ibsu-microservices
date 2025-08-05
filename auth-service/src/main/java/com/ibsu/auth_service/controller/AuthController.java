@@ -16,6 +16,9 @@ import com.ibsu.auth_service.service.AuthService;
 import com.ibsu.common.dto.EditUserRequest;
 import com.ibsu.common.exceptions.RefreshTokenNotFoundException;
 import com.ibsu.common.exceptions.UserNotFoundException;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -41,23 +44,22 @@ public class AuthController {
         return ResponseEntity.ok(authService.register(request.username(), request.password(), request.email(), request.phone(), request.firstName(), request.lastName()));
     }
 
-    @PostMapping("/admin/deactivate")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<?> deactivateUser() {
-        Long userId = Long.parseLong(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
-        authService.deactivateUser(userId);
-        return ResponseEntity.ok(new MessageResponse("User deactivated successfully!"));
-    }
+
     @PostMapping("/edit")
-    public ResponseEntity<?> editUser(@RequestBody EditUserRequest request) {
+    public ResponseEntity<?> editCurrentUser(@RequestBody EditUserRequest request) {
         Long userId = Long.parseLong(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
         return ResponseEntity.ok(authService.editUser(request.firstName(), request.lastName(), request.phone(), request.password(), request.newPassword(), request.repeatPassword(), userId));
     }
+
+
     @GetMapping("/user")
-    public ResponseEntity<?> getUser() {
+    public ResponseEntity<?> getCurrentUser() {
         Long userId = Long.parseLong(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
         return ResponseEntity.ok(authService.getUser(userId));
     }
+
+
+
 
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> login(@RequestBody LoginRequest request) {
@@ -86,5 +88,45 @@ public class AuthController {
         refreshTokenService.deleteByUserId(userId);
         SecurityContextHolder.clearContext();
         return ResponseEntity.ok(new MessageResponse("Log out successful!"));
+    }
+
+    @PostMapping("/admin/deactivate")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> deactivateUser(@RequestParam Long userId) {
+        authService.deactivateUser(userId);
+        return ResponseEntity.ok(new MessageResponse("User deactivated successfully!"));
+    }
+
+    @PostMapping("/admin/activate")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> activateUser(@RequestParam Long userId) {
+        authService.activateUser(userId);
+        return ResponseEntity.ok(new MessageResponse("User activated successfully!"));
+    }
+
+    @GetMapping("/admin/users")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> getAllUsers(@PageableDefault(page = 0, size = 9, sort = "registrationDate", direction = Sort.Direction.DESC)
+                                         Pageable pageable) {
+        return ResponseEntity.ok(userRepository.findAll(pageable));
+    }
+
+    @GetMapping("/admin/users/{userId}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> getUserById(@PathVariable Long userId) {
+        return ResponseEntity.ok(userRepository.findById(userId).orElseThrow(UserNotFoundException::new));
+    }
+
+    @PostMapping("/admin/edit/{userId}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> editUserByAdmin(@RequestBody EditUserRequest request, @PathVariable Long userId) {
+        return ResponseEntity.ok(authService.editUser(request.firstName(), request.lastName(), request.phone(), request.password(), request.newPassword(), request.repeatPassword(), userId));
+    }
+
+    @DeleteMapping("/admin/delete")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> deleteUser(@RequestParam Long userId) {
+        authService.deleteUser(userId);
+        return ResponseEntity.ok().body(new MessageResponse("User deleted successfully!"));
     }
 }

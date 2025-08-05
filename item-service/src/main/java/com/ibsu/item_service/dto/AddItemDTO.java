@@ -87,4 +87,6 @@ public class AddItemDTO {
     public void setItemStatus(ItemStatusEnum itemStatus) {
         this.itemStatus = itemStatus;
     }
+
+
 }

@@ -10,6 +10,7 @@ import com.ibsu.common.event.OrderCanceledEvent;
 import com.ibsu.common.event.OrderConfirmedEvent;
 import com.ibsu.common.exceptions.OrderItemsNotFoundException;
 import com.ibsu.common.exceptions.OrderNotFoundException;
+import com.ibsu.common.exceptions.OrderStatusNotPendingException;
 import com.ibsu.order_service.client.CartClient;
 import com.ibsu.order_service.dto.OrderHistoryDTO;
 import com.ibsu.order_service.dto.OrderResponseDTO;
@@ -18,17 +19,22 @@ import com.ibsu.order_service.model.OrderItem;
 import com.ibsu.order_service.repository.OrderItemRepository;
 import com.ibsu.order_service.repository.OrderRepository;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class OrderService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(OrderService.class);
 
     private final OrderRepository orderRepository;
     private final CartClient cartClient;
@@ -63,6 +69,7 @@ public class OrderService {
 
     @Transactional
     public OrderResponseDTO checkout(Long userId, DeliveryTypeEnum deliveryType) {
+        LOGGER.info("Checking out order by userId: {}", userId);
         CartResponseDTO cart = cartClient.getCart();
 
         if (cart.getItems() == null || cart.getItems().isEmpty()) {
@@ -131,6 +138,7 @@ public class OrderService {
     }
 
     public Page<OrderHistoryDTO> getUserOrderHistory(Long userId, Pageable pageable) {
+        LOGGER.info("Retrieving user order history for userId: {}", userId);
         Page<Order> ordersPage = orderRepository.findAllByUserId(userId, pageable);
         return ordersPage.map(order -> {
             OrderItem firstItem = order.getItems().isEmpty() ? null : order.getItems().get(0);
@@ -147,6 +155,7 @@ public class OrderService {
     }
 
     public OrderResponseDTO getOrderDetails(Long userId, Long id) {
+        LOGGER.info("Retrieving order details for userId: {}", userId);
         Order order = orderRepository.findById(id).orElseThrow(() -> new OrderNotFoundException("Order not found: " + id));
         List<OrderItemResponseDTO> orderItems = orderItemRepository.findByOrderIdAndOrder_UserId(id, userId);
         if (orderItems == null || orderItems.isEmpty()) {
@@ -159,6 +168,22 @@ public class OrderService {
     }
 
     public void deleteOrderByCurrentUser(Long userId, Long id) {
+        LOGGER.info("Deleting order for by current user: {}", userId);
+        OrderResponseDTO orderResponseDTO = getOrderDetails(userId, id);
+        if (orderResponseDTO != null) {
+            if (orderResponseDTO.getOrderStatus() != OrderStatusEnum.PENDING) {
+                throw new OrderStatusNotPendingException("Only pending orders can be canceled");
+            }
+            orderRepository.deleteById(id);
+            orderCancelledKafkaTemplate.send(ORDER_CANCELED_TOPIC,
+                    new OrderCanceledEvent(getItemIds(orderResponseDTO.getItems()), orderResponseDTO.getOrderId()));
+        } else {
+            throw new OrderNotFoundException("Order not found: " + id);
+        }
+    }
+
+    public void deleteOrder(Long userId, Long id) {
+        LOGGER.info("Deleting order for userId: {}", userId);
         OrderResponseDTO orderResponseDTO = getOrderDetails(userId, id);
         if (orderResponseDTO != null) {
             orderRepository.deleteById(id);
@@ -169,19 +194,38 @@ public class OrderService {
         }
     }
 
-    public void confirmOrder(Long userId, Long id) {
-        OrderResponseDTO orderResponseDTO = getOrderDetails(userId, id);
-        if (orderResponseDTO != null) {
-            orderConfirmedKafkaTemplate.send(ORDER_CONFIRMED_NOTIFICATION_TOPIC,
-                    new OrderConfirmedEvent(id, userId, getItemIds(orderResponseDTO.getItems())));
-        } else {
-            throw new OrderNotFoundException("Order not found: " + id);
+    @Scheduled(fixedRate = 60) // Every 1 hour
+    @Transactional
+    public void deleteExpiredOrders() {
+        LOGGER.info("Deleting expired orders");
+        Instant expirationTime = Instant.now().minus(Duration.ofMinutes(24));
+        List<Order> expiredOrders = orderRepository.findByCreatedAtBeforeAndOrderStatus(
+                expirationTime, OrderStatusEnum.PENDING
+        );
+        LOGGER.info("Expired orders: {}", expiredOrders.size());
+        for (Order order : expiredOrders) {
+            orderRepository.delete(order);
+            orderCancelledKafkaTemplate.send(ORDER_CANCELED_TOPIC,
+                    new OrderCanceledEvent(getItemIdsFromOrder(order), order.getId()));
         }
     }
 
+//    public void confirmOrder(Long userId, Long id) {
+//        OrderResponseDTO orderResponseDTO = getOrderDetails(userId, id);
+//        if (orderResponseDTO != null) {
+//            orderConfirmedKafkaTemplate.send(ORDER_CONFIRMED_NOTIFICATION_TOPIC,
+//                    new OrderConfirmedEvent(id, userId, getItemIds(orderResponseDTO.getItems())));
+//        } else {
+//            throw new OrderNotFoundException("Order not found: " + id);
+//        }
+//    }
+
+    @Transactional
     public void approveOrder(Long userId, Long id) {
+        LOGGER.info("Approving order: {} for userId: {}", id, userId);
         OrderResponseDTO orderResponseDTO = getOrderDetails(userId, id);
         if (orderResponseDTO != null) {
+            orderRepository.updateOrderStatus(OrderStatusEnum.ACCEPTED, orderResponseDTO.getOrderId());
             orderConfirmedKafkaTemplate.send(ORDER_APPROVED_TOPIC, new OrderConfirmedEvent(id, userId, getItemIds(orderResponseDTO.getItems())));
         } else {
             throw new OrderNotFoundException("Order not found: " + id);
@@ -192,6 +236,14 @@ public class OrderService {
         List<Long> itemIds = new ArrayList<>();
         for (OrderItemResponseDTO orderItem : orderItems) {
             itemIds.add(orderItem.getItemId());
+        }
+        return itemIds;
+    }
+
+    private List<Long> getItemIdsFromOrder(Order order) {
+        List<Long> itemIds = new ArrayList<>();
+        for (OrderItem item : order.getItems()) {
+            itemIds.add(item.getItemId());
         }
         return itemIds;
     }

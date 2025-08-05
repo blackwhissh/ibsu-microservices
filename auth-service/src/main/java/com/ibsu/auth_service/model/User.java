@@ -9,7 +9,6 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "users")
 @Setter @Getter @NoArgsConstructor @AllArgsConstructor @ToString
-
 public class User {
     @Id
     @SequenceGenerator(name = "users_id_seq", sequenceName = "users_id_seq", allocationSize = 1)
@@ -25,6 +24,7 @@ public class User {
     private String lastName;
     private LocalDate deactivationDate;
     private Boolean isActive;
+    private LocalDate registrationDate;
 
     public User(String username, String password, RoleEnum role, String email, String phone, String firstName, String lastName, LocalDate deactivationDate, Boolean isActive) {
         this.username = username;
@@ -36,5 +36,6 @@ public class User {
         this.lastName = lastName;
         this.deactivationDate = deactivationDate;
         this.isActive = isActive;
+        this.registrationDate = LocalDate.now();
     }
 }

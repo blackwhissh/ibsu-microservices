@@ -31,20 +31,6 @@ public class ItemController {
         this.messagingTemplate = messagingTemplate;
     }
 
-    @PostMapping(value = "/admin/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ItemPreviewDTO addItem(@ModelAttribute AddItemDTO addItemDTO) {
-        Item saved = itemService.addItem(
-                addItemDTO.getTitle(), addItemDTO.getDescription(), addItemDTO.getSize(),
-                addItemDTO.getMedium(), addItemDTO.getPrice(), addItemDTO.getImageFile(),
-                addItemDTO.getPaintedDate(), addItemDTO.getArtist()
-        );
-
-        ItemPreviewDTO dto = mapToDto(saved);
-        messagingTemplate.convertAndSend("/topic/items", dto);
-        return dto;
-    }
-
     @GetMapping("/get/{itemId}")
     public ResponseEntity<Item> getItem(@PathVariable Long itemId) {
         return ResponseEntity.ok(itemService.getItemById(itemId));
@@ -57,9 +43,17 @@ public class ItemController {
         return ResponseEntity.ok(itemService.getAllAvailableItems(pageable));
     }
 
+    @GetMapping("/admin/items")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Page<Item>> getAllItems(
+            @PageableDefault(page = 0, size = 9, sort = "publishDate", direction = Sort.Direction.DESC)
+            Pageable pageable) {
+        return ResponseEntity.ok(itemService.getAllItems(pageable));
+    }
+
     @DeleteMapping("/admin/delete-items")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<?> deleteItem(@RequestBody List<Long> itemId) {
+    public ResponseEntity<?> deleteItems(@RequestBody List<Long> itemId) {
         itemService.deleteItems(itemId);
         return ResponseEntity.noContent().build();
     }
@@ -79,6 +73,20 @@ public class ItemController {
                 updateItemDTO.artist(), updateItemDTO.size(), updateItemDTO.medium(), updateItemDTO.imageFile(),
                 updateItemDTO.paintedDate()
         ));
+    }
+
+    @PostMapping(value = "/admin/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ItemPreviewDTO addItem(@ModelAttribute AddItemDTO addItemDTO) {
+        Item saved = itemService.addItem(
+                addItemDTO.getTitle(), addItemDTO.getDescription(), addItemDTO.getSize(),
+                addItemDTO.getMedium(), addItemDTO.getPrice(), addItemDTO.getImageFile(),
+                addItemDTO.getPaintedDate(), addItemDTO.getArtist()
+        );
+
+        ItemPreviewDTO dto = mapToDto(saved);
+        messagingTemplate.convertAndSend("/topic/items", dto);
+        return dto;
     }
 
     @GetMapping("/get-by-ids")

@@ -80,8 +80,13 @@ public class ItemService {
     }
 
     public Page<Item> getAllAvailableItems(Pageable pageable) {
-        LOGGER.info("Getting all items");
+        LOGGER.info("Getting all available items");
         return itemRepository.findAllByItemStatus(ItemStatusEnum.AVAILABLE, pageable);
+    }
+
+    public Page<Item> getAllItems(Pageable pageable) {
+        LOGGER.info("Getting all items");
+        return itemRepository.findAll(pageable);
     }
 
     @Transactional

@@ -109,6 +109,14 @@ public class AuthService {
         userRepository.save(user);
     }
 
+    public void activateUser(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+        user.setIsActive(true);
+        user.setDeactivationDate(null);
+
+        userRepository.save(user);
+    }
+
     public UserDTO editUser(Optional<String> firstName, Optional<String> lastName, Optional<String> phone,
                             Optional<String> password, Optional<String> newPassword, Optional<String> repeatPassword, Long userId) {
         User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
@@ -166,5 +174,9 @@ public class AuthService {
     }
 
 
-
+    public void deleteUser(Long userId) {
+        userRepository.deleteById(userId);
+        UserDeactivatedEvent event = new UserDeactivatedEvent(userId);
+        userDeactivatedEventProducer.sendUserDeactivatedEvent(event);
+    }
 }

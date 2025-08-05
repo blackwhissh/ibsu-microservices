@@ -26,3 +26,9 @@ management:
     tracing:
       endpoint: http://localhost:9411/api/v2/spans
 
+cors:
+  allowed-origins:
+    - http://localhost:3000
+    - http://localhost:3000
+
+

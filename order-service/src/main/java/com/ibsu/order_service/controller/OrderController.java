@@ -29,9 +29,12 @@ public class OrderController {
     @PostMapping(value = "/checkout")
     public ResponseEntity<OrderResponseDTO> checkout(@RequestParam DeliveryTypeEnum delivery) {
         Long userId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
-        if (delivery == null) {
-            delivery = DeliveryTypeEnum.ONSITE;
-        }
+//        if (delivery == null) {
+//            delivery = DeliveryTypeEnum.ONSITE;
+//        }
+
+        // Temporarily all delivery types are set to onsite
+        delivery = DeliveryTypeEnum.ONSITE;
         return ResponseEntity.ok(orderService.checkout(userId, delivery));
     }
 
@@ -64,19 +67,19 @@ public class OrderController {
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/admin/cancel/{orderId}")
+    @DeleteMapping("/admin/cancel")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<OrderResponseDTO> cancelOrderByAdmin(@PathVariable Long orderId, @RequestParam Long userId) {
+    public ResponseEntity<OrderResponseDTO> cancelOrderByAdmin(@RequestParam Long orderId, @RequestParam Long userId) {
         orderService.deleteOrderByCurrentUser(userId, orderId);
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/confirm/{orderId}")
-    public ResponseEntity<?> confirmOrderByCurrentUser(@PathVariable Long orderId) {
-        Long userId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
-        orderService.confirmOrder(userId, orderId);
-        return ResponseEntity.ok().body("Order confirmed");
-    }
+//    @PostMapping("/confirm/{orderId}")
+//    public ResponseEntity<?> confirmOrderByCurrentUser(@PathVariable Long orderId) {
+//        Long userId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
+//        orderService.confirmOrder(userId, orderId);
+//        return ResponseEntity.ok().body("Order confirmed");
+//    }
 
     @PostMapping("/admin/approve")
     @PreAuthorize("hasRole('ROLE_ADMIN')")

@@ -1,6 +1,8 @@
 package com.ibsu.auth_service.config;
 
+import com.ibsu.common.exceptions.EmailAlreadyExistsException;
 import com.ibsu.common.exceptions.ExceptionResponse;
+import com.ibsu.common.exceptions.UserAlreadyExistsException;
 import com.ibsu.common.exceptions.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,5 +37,21 @@ public class GlobalExceptionHandler {
             errors.put(fieldName, errorMessage);
         });
         return errors;
+    }
+
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<Object> handleUserAlreadyExistsException(UserAlreadyExistsException e) {
+        ExceptionResponse response = new ExceptionResponse();
+        response.setDateTime(LocalDateTime.now());
+        response.setMessage("User with username already exists!");
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<Object> handleEmailAlreadyExistsException(EmailAlreadyExistsException e) {
+        ExceptionResponse response = new ExceptionResponse();
+        response.setDateTime(LocalDateTime.now());
+        response.setMessage("Email already exists!");
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 }

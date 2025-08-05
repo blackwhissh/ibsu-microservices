@@ -31,7 +31,8 @@ public class JwtAuthFilter implements GatewayFilterFactory<JwtAuthFilter.Config>
             String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
             if (request.getURI().getPath().startsWith("/auth") &&
                     !request.getURI().getPath().equals("/auth/user") &&
-                    !request.getURI().getPath().equals("/auth/edit")) {
+                    !request.getURI().getPath().equals("/auth/edit") &&
+                    !request.getURI().getPath().startsWith("/auth/admin")) {
                 return chain.filter(exchange);
             }
 
